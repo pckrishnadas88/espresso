@@ -7,6 +7,7 @@ defmodule MyApp do
     pass: ["*/*"],
     json_decoder: Jason
 
+  # Enable logger middleware for request logging
   use_middleware Espresso.Logger
 
   # Root Route

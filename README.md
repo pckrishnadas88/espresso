@@ -39,8 +39,14 @@ Building an API with Espresso is straightforward. Define your routes and start t
 defmodule MyApp do
   use Espresso
 
-  # Middleware for JSON parsing
-  use_middleware Plug.Parsers, parsers: [:json], json_decoder: Jason
+  # Middleware for JSON, form-data, urlencode parsing
+  use_middleware Plug.Parsers,
+    parsers: [:urlencoded, :multipart, :json],
+    pass: ["*/*"],
+    json_decoder: Jason
+  
+  # Enable logger middleware for request logging
+  use_middleware Espresso.Logger
 
   # Root Route
   get "/" do
