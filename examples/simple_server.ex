@@ -1,34 +1,31 @@
 defmodule MyApp do
   use Espresso
 
-  # Middlewares
+  # Middleware for JSON parsing
   use_middleware Plug.Parsers, parsers: [:json], json_decoder: Jason
 
-  # Global routes
+  # Root Route
   get "/" do
-    send_resp(conn, 200, "Espresso Root")
+    conn |> send("Welcome to Espresso")
   end
 
   # Scoped API
   scope "/api/v1" do
+    # GET with dynamic param
     get "/users/:id" do
-      send_resp(conn, 200, "GET User #{id}")
+      conn |> json(%{user_id: id, status: "active"})
     end
 
+    # POST with JSON response
     post "/users" do
-      send_resp(conn, 201, "POST User Created")
+      # Accessing req.body via conn.body_params
+      user_data = conn.body_params
+      conn |> status(201) |> json(%{message: "User created", data: user_data})
     end
 
-    put "/users/:id" do
-      send_resp(conn, 200, "PUT User #{id} Updated")
-    end
-
-    patch "/users/:id" do
-      send_resp(conn, 200, "PATCH User #{id} Partially Updated")
-    end
-
+    # DELETE
     delete "/users/:id" do
-      send_resp(conn, 200, "DELETE User #{id} Removed")
+      conn |> status(204) |> send("")
     end
   end
 end

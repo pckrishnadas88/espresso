@@ -1,24 +1,37 @@
 defmodule Espresso do
+  @version "0.1.0"
+
+  def version, do: @version
+
   defmacro __using__(_opts) do
     quote do
+      # This line is the fix: it stops the conflict with Elixir's built-in send
+      import Kernel, except: [send: 2]
       import Espresso
       import Plug.Conn
       @behaviour Plug
 
       Module.register_attribute(__MODULE__, :routes, accumulate: true)
       Module.register_attribute(__MODULE__, :middlewares, accumulate: true)
-
-      # Track current scope prefix during compilation
       Module.put_attribute(__MODULE__, :path_prefix, "")
 
       def init(opts), do: opts
+      def call(var!(conn), _opts), do: execute_pipeline(var!(conn))
 
-      def call(var!(conn), _opts) do
-        execute_pipeline(var!(conn))
+      def status(var!(conn), code), do: %{var!(conn) | status: code}
+
+      def send(var!(conn), body) do
+        send_resp(var!(conn), var!(conn).status || 200, body)
+      end
+
+      def json(var!(conn), data) do
+        var!(conn)
+        |> put_resp_content_type("application/json")
+        |> send_resp(var!(conn).status || 200, Jason.encode!(data))
       end
 
       def listen(port \\ 4000) do
-        IO.puts "🚀 Espresso serving on http://localhost:#{port}"
+        IO.puts("🚀 Espresso serving on http://localhost:#{port}")
         Plug.Cowboy.http(__MODULE__, [], port: port)
       end
 
@@ -26,25 +39,19 @@ defmodule Espresso do
     end
   end
 
-  # --- Scope Macro ---
+  # ... (Keep scope, use_middleware, and verbs the same) ...
   defmacro scope(path, do: block) do
     quote do
       old_prefix = Module.get_attribute(__MODULE__, :path_prefix)
-      new_prefix = old_prefix <> unquote(path)
-      Module.put_attribute(__MODULE__, :path_prefix, new_prefix)
-
+      Module.put_attribute(__MODULE__, :path_prefix, old_prefix <> unquote(path))
       unquote(block)
-
       Module.put_attribute(__MODULE__, :path_prefix, old_prefix)
     end
   end
 
-  # --- Middleware Macro ---
-  defmacro use_middleware(plug_mod, opts \\ []) do
-    quote do: @middlewares {unquote(plug_mod), unquote(opts)}
-  end
+  defmacro use_middleware(plug_mod, opts \\ []),
+    do: quote(do: @middlewares({unquote(plug_mod), unquote(opts)}))
 
-  # --- All HTTP Verbs ---
   defmacro get(path, do: block), do: define_route("GET", path, block)
   defmacro post(path, do: block), do: define_route("POST", path, block)
   defmacro put(path, do: block), do: define_route("PUT", path, block)
@@ -53,7 +60,6 @@ defmodule Espresso do
 
   defp define_route(method, path, block) do
     quote do
-      # Merge prefix + path
       full_path = Module.get_attribute(__MODULE__, :path_prefix) <> unquote(path)
 
       segments =
@@ -68,42 +74,40 @@ defmodule Espresso do
     end
   end
 
-  # --- The Code Merger (Generator) ---
   defmacro __before_compile__(env) do
     routes = Module.get_attribute(env.module, :routes)
     middlewares = Module.get_attribute(env.module, :middlewares) |> Enum.reverse()
 
-    middleware_calls = for {plug, opts} <- middlewares do
-      quote do
-        var!(conn) = unquote(plug).call(var!(conn), unquote(plug).init(unquote(opts)))
-      end
-    end
+    mw_logic =
+      for {p, o} <- middlewares,
+          do: quote(do: var!(conn) = unquote(p).call(var!(conn), unquote(p).init(unquote(o))))
 
-    route_handlers = for {method, segments, block} <- routes do
-      args = Enum.map(segments, fn
-        s when is_atom(s) -> quote do: var!(unquote({s, [], nil}))
-        s -> s
-      end)
+    handlers =
+      for {method, segments, block} <- routes do
+        args =
+          Enum.map(segments, fn
+            s when is_atom(s) -> quote do: var!(unquote({s, [], nil}))
+            s -> s
+          end)
 
-      quote do
-        defp dispatch(var!(conn), unquote(method), unquote(args)) do
-          unquote(block)
+        # FIX: Added parentheses to solve the ambiguity warning
+        quote do
+          defp dispatch(var!(conn), unquote(method), unquote(args)) do
+            unquote(block)
+          end
         end
       end
-    end
 
     quote do
       defp execute_pipeline(var!(conn)) do
-        unquote_splicing(middleware_calls)
+        unquote_splicing(mw_logic)
 
-        if !var!(conn).halted do
-          dispatch(var!(conn), var!(conn).method, var!(conn).path_info)
-        else
-          var!(conn)
-        end
+        if !var!(conn).halted,
+          do: dispatch(var!(conn), var!(conn).method, var!(conn).path_info),
+          else: var!(conn)
       end
 
-      unquote(route_handlers)
+      unquote(handlers)
       defp dispatch(conn, _, _), do: send_resp(conn, 404, "Not Found")
     end
   end
