@@ -35,3 +35,25 @@ defmodule MyApp do
     end
   end
 end
+
+# --- NEW: The Application Supervisor ---
+defmodule MyApp.Application do
+  use Application
+
+  @doc """
+  This starts your app as a supervised process.
+  If the web server crashes, the Supervisor will restart it instantly.
+  """
+  def start(_type, _args) do
+    children = [
+      # We use Plug.Cowboy.child_spec to define the worker
+      {Plug.Cowboy, scheme: :http, plug: MyApp, options: [port: 4000]}
+    ]
+
+    # :one_for_one = If a process dies, restart only that process.
+    opts = [strategy: :one_for_one, name: MyApp.Supervisor]
+
+    IO.puts "🛡️  Supervision Tree started. Watching MyApp..."
+    Supervisor.start_link(children, opts)
+  end
+end
