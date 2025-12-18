@@ -4,31 +4,31 @@ defmodule MyApp do
   # Middlewares
   use_middleware Plug.Parsers, parsers: [:json], json_decoder: Jason
 
-  # Static Route
+  # Global routes
   get "/" do
-    send_resp(conn, 200, "API Home")
+    send_resp(conn, 200, "Espresso Root")
   end
 
-  # Dynamic Route with 1 parameter
-  get "/users/:id" do
-    # 'id' is available because the Macro pattern-matched it!
-    response = %{user_id: id, message: "Fetched user #{id}"}
-    send_resp(conn, 200, Jason.encode!(response))
-  end
+  # Scoped API
+  scope "/api/v1" do
+    get "/users/:id" do
+      send_resp(conn, 200, "GET User #{id}")
+    end
 
-  # Complex Dynamic Route with 2 parameters
-  get "/users/:user_id/posts/:post_id" do
-    response = %{
-      user: user_id,
-      post: post_id,
-      path: conn.request_path
-    }
-    send_resp(conn, 200, Jason.encode!(response))
-  end
+    post "/users" do
+      send_resp(conn, 201, "POST User Created")
+    end
 
-  # POST route
-  post "/users" do
-    name = conn.body_params["name"]
-    send_resp(conn, 201, "User #{name} created")
+    put "/users/:id" do
+      send_resp(conn, 200, "PUT User #{id} Updated")
+    end
+
+    patch "/users/:id" do
+      send_resp(conn, 200, "PATCH User #{id} Partially Updated")
+    end
+
+    delete "/users/:id" do
+      send_resp(conn, 200, "DELETE User #{id} Removed")
+    end
   end
 end

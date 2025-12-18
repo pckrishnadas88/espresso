@@ -8,9 +8,11 @@ defmodule Espresso do
       Module.register_attribute(__MODULE__, :routes, accumulate: true)
       Module.register_attribute(__MODULE__, :middlewares, accumulate: true)
 
+      # Track current scope prefix during compilation
+      Module.put_attribute(__MODULE__, :path_prefix, "")
+
       def init(opts), do: opts
 
-      # We use var!(conn) here to start the context
       def call(var!(conn), _opts) do
         execute_pipeline(var!(conn))
       end
@@ -24,32 +26,53 @@ defmodule Espresso do
     end
   end
 
+  # --- Scope Macro ---
+  defmacro scope(path, do: block) do
+    quote do
+      old_prefix = Module.get_attribute(__MODULE__, :path_prefix)
+      new_prefix = old_prefix <> unquote(path)
+      Module.put_attribute(__MODULE__, :path_prefix, new_prefix)
+
+      unquote(block)
+
+      Module.put_attribute(__MODULE__, :path_prefix, old_prefix)
+    end
+  end
+
+  # --- Middleware Macro ---
   defmacro use_middleware(plug_mod, opts \\ []) do
     quote do: @middlewares {unquote(plug_mod), unquote(opts)}
   end
 
+  # --- All HTTP Verbs ---
   defmacro get(path, do: block), do: define_route("GET", path, block)
   defmacro post(path, do: block), do: define_route("POST", path, block)
+  defmacro put(path, do: block), do: define_route("PUT", path, block)
+  defmacro patch(path, do: block), do: define_route("PATCH", path, block)
+  defmacro delete(path, do: block), do: define_route("DELETE", path, block)
 
   defp define_route(method, path, block) do
-    segments =
-      path
-      |> String.split("/", trim: true)
-      |> Enum.map(fn
-        ":" <> var -> String.to_atom(var)
-        literal -> literal
-      end)
-
     quote do
-      @routes {unquote(method), unquote(segments), unquote(Macro.escape(block))}
+      # Merge prefix + path
+      full_path = Module.get_attribute(__MODULE__, :path_prefix) <> unquote(path)
+
+      segments =
+        full_path
+        |> String.split("/", trim: true)
+        |> Enum.map(fn
+          ":" <> var -> String.to_atom(var)
+          literal -> literal
+        end)
+
+      @routes {unquote(method), segments, unquote(Macro.escape(block))}
     end
   end
 
+  # --- The Code Merger (Generator) ---
   defmacro __before_compile__(env) do
     routes = Module.get_attribute(env.module, :routes)
     middlewares = Module.get_attribute(env.module, :middlewares) |> Enum.reverse()
 
-    # We wrap 'conn' in var!() so it can be updated by middlewares
     middleware_calls = for {plug, opts} <- middlewares do
       quote do
         var!(conn) = unquote(plug).call(var!(conn), unquote(plug).init(unquote(opts)))
