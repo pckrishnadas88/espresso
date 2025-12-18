@@ -98,12 +98,6 @@ MIT
 
 ---
 
-### Pro-Tip for your GitHub
-
-Since you mentioned international migration, make sure your **commit history** is clean.
-
-**Would you like me to show you how to write a `test` file now?** Adding a `test/espresso_test.exs` and mentioning it in the README (e.g., "Run `mix test` to verify") is the single best way to prove to a US/EU company that you write production-ready code.
-
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
