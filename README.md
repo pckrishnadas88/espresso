@@ -39,26 +39,38 @@ Building an API with Espresso is straightforward. Define your routes and start t
 defmodule MyApp do
   use Espresso
 
-  # Register Middlewares
+  # Middlewares
   use_middleware Plug.Parsers, parsers: [:json], json_decoder: Jason
-  use_middleware Espresso.Logger # If you implemented the logger helper
 
-  # Static Route
+  # Global routes
   get "/" do
-    send_resp(conn, 200, "Welcome to Espresso!")
+    send_resp(conn, 200, "Espresso Root")
   end
 
-  # Dynamic Route
-  get "/users/:id" do
-    # 'id' is automatically injected into this block by the macro
-    send_resp(conn, 200, "Fetching data for user #{id}")
-  end
+  # Scoped API
+  scope "/api/v1" do
+    get "/users/:id" do
+      send_resp(conn, 200, "GET User #{id}")
+    end
 
-  # JSON POST Route
-  post "/echo" do
-    send_resp(conn, 201, Jason.encode!(conn.body_params))
+    post "/users" do
+      send_resp(conn, 201, "POST User Created")
+    end
+
+    put "/users/:id" do
+      send_resp(conn, 200, "PUT User #{id} Updated")
+    end
+
+    patch "/users/:id" do
+      send_resp(conn, 200, "PATCH User #{id} Partially Updated")
+    end
+
+    delete "/users/:id" do
+      send_resp(conn, 200, "DELETE User #{id} Removed")
+    end
   end
 end
+
 
 # To start the server:
 # MyApp.listen(4000)
@@ -89,7 +101,7 @@ This project is currently a **Proof of Concept**.
 * [x] Basic HTTP Verbs
 * [x] Middleware Support
 * [x] Dynamic Path Segments
-* [ ] Scoped Routes (Planned)
+* [x] Scoped Routes (Planned)
 * [ ] Built-in Error Handling (Planned)
 
 ## License
