@@ -6,7 +6,7 @@ defmodule EspressoWeb do
   functions, providing a developer experience similar to Express.js but with the
   fault-tolerance and speed of the Erlang VM (BEAM).
   """
-  @version "0.1.0"
+  @version "0.1.3"
 
   def version, do: @version
 
