@@ -8,7 +8,18 @@ defmodule Espresso.MixProject do
       elixir: "~> 1.19",
       start_permanent: Mix.env() == :prod,
       description: "A lightweight, macro-based web framework inspired by Express.js",
-      deps: deps()
+      deps: deps(),
+      description: "A minimal, macro-based web framework inspired by Express.js",
+      package: package(),
+      name: "Espresso",
+      source_url: "https://github.com/pckrishnadas88/espresso"
+    ]
+  end
+  defp package do
+    [
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/pckrishnadas88/espresso"},
+      maintainers: ["Krishnadas P.C"]
     ]
   end
 
@@ -16,7 +27,6 @@ defmodule Espresso.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {MyApp.Application, []}
     ]
   end
 

@@ -2,13 +2,28 @@ defmodule MyApp do
   use Espresso
 
   # Middleware for JSON, form-data, urlencode parsing
-  use_middleware Plug.Parsers,
+  use_middleware(Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
     json_decoder: Jason
+  )
 
   # Enable logger middleware for request logging
-  use_middleware Espresso.Logger
+  use_middleware(Espresso.Logger)
+
+  # health check route
+  get "/health" do
+    # Get the system uptime in milliseconds
+    {uptime, _} = :erlang.statistics(:wall_clock)
+
+    conn
+    |> status(200)
+    |> json(%{
+      status: "UP",
+      uptime_ms: uptime,
+      version: "1.0.0"
+    })
+  end
 
   # Root Route
   get "/" do
@@ -45,15 +60,21 @@ defmodule MyApp.Application do
   If the web server crashes, the Supervisor will restart it instantly.
   """
   def start(_type, _args) do
+    # 1. Look for an environment variable named "PORT"
+    # 2. If it's nil, default to "4000"
+    # 3. Convert the string to an integer (Cowboy needs an integer)
+    port_string = System.get_env("PORT") || "4000"
+    port = String.to_integer(port_string)
+
     children = [
       # We use Plug.Cowboy.child_spec to define the worker
-      {Plug.Cowboy, scheme: :http, plug: MyApp, options: [port: 4000]}
+      {Plug.Cowboy, scheme: :http, plug: MyApp, options: [port: port]}
     ]
 
     # :one_for_one = If a process dies, restart only that process.
     opts = [strategy: :one_for_one, name: MyApp.Supervisor]
 
-    IO.puts "🛡️  Supervision Tree started. Watching MyApp..."
+    IO.puts("🛡️  Espresso running on port #{port}")
     Supervisor.start_link(children, opts)
   end
 end

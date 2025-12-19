@@ -1,10 +1,17 @@
 defmodule Espresso do
   @version "0.1.0"
+  @moduledoc """
+  Espresso is a minimal, macro-based web framework.
+
+  It allows for Express-like routing while leveraging the
+  performance and fault-tolerance of the Erlang VM.
+  """
 
   def version, do: @version
 
   defmacro __using__(_opts) do
     quote do
+      @doc "Sets the HTTP response status code."
       # This line is the fix: it stops the conflict with Elixir's built-in send
       import Kernel, except: [send: 2]
       import Espresso
@@ -52,6 +59,14 @@ defmodule Espresso do
   defmacro use_middleware(plug_mod, opts \\ []),
     do: quote(do: @middlewares({unquote(plug_mod), unquote(opts)}))
 
+  @doc """
+  Defines a GET route.
+
+  ## Examples
+      get "/hello" do
+        conn |> send("world")
+      end
+  """
   defmacro get(path, do: block), do: define_route("GET", path, block)
   defmacro post(path, do: block), do: define_route("POST", path, block)
   defmacro put(path, do: block), do: define_route("PUT", path, block)
