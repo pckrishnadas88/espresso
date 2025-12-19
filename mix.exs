@@ -4,7 +4,7 @@ defmodule Espresso.MixProject do
   def project do
     [
       app: :espresso_web,
-      version: "0.1.0",
+      version: "0.1.3",
       elixir: "~> 1.19",
       start_permanent: Mix.env() == :prod,
       description: "A lightweight, macro-based web framework inspired by Express.js",
@@ -20,7 +20,7 @@ defmodule Espresso.MixProject do
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/pckrishnadas88/espresso"},
       maintainers: ["Krishnadas P.C"],
-      files: ~w(lib/espresso_web.ex LICENSE.md mix.exs README.md)
+      files: ~w(lib LICENSE.md mix.exs README.md)
     ]
   end
 

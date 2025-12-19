@@ -23,7 +23,7 @@ https://hex.pm/packages/espresso_web
 ```elixir
 def deps do
   [
-    {:espresso_web, "~> 0.1.0"},
+    {:espresso_web, "~> 0.1.3"},
     {:plug_cowboy, "~> 2.7"},
     {:jason, "~> 1.4"}
   ]
@@ -101,21 +101,19 @@ When you write a route in Espresso Web, the **Macro Engine** performs a "Code Me
 
 ---
 
-## Current Status (v0.1.0)
+## Current Status (v0.1.3)
 
 This project is currently a **Proof of Concept**.
 
 * [x] Basic HTTP Verbs
 * [x] Middleware Support
 * [x] Dynamic Path Segments
-* [x] Scoped Routes (Planned)
-* [ ] Built-in Error Handling (Planned)
+* [x] Scoped Routes
+* [x] Built-in Error Handling
 
 ## License
 
 MIT
-
----
 
 
 

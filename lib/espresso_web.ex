@@ -28,6 +28,11 @@ defmodule EspressoWeb do
       import Plug.Conn
       @behaviour Plug
 
+      @default_middlewares [
+        {EspressoWeb.ErrorHandler, []},
+        {Plug.Parsers, parsers: [:json], pass: ["*/*"], json_decoder: Jason},
+        {EspressoWeb.Logger, []}
+      ]
       Module.register_attribute(__MODULE__, :routes, accumulate: true)
       Module.register_attribute(__MODULE__, :middlewares, accumulate: true)
       Module.put_attribute(__MODULE__, :path_prefix, "")
