@@ -1,4 +1,4 @@
-defmodule Espresso do
+defmodule EspressoWeb do
   @moduledoc """
   Espresso is a minimal, high-performance web framework for Elixir.
 
@@ -11,10 +11,10 @@ defmodule Espresso do
   def version, do: @version
 
   @doc """
-  Sets up the module to use Espresso.
+  Sets up the module to use EspressoWeb.
 
-  When you `use Espresso`, it:
-  1. Imports `Espresso` and `Plug.Conn` functions.
+  When you `use EspressoWeb`, it:
+  1. Imports `EspressoWeb` and `Plug.Conn` functions.
   2. Sets up the route tracking system.
   3. Prepares the module for the `@before_compile` hook.
   """
@@ -24,7 +24,7 @@ defmodule Espresso do
       @doc "Sets the HTTP response status code."
       # This line is the fix: it stops the conflict with Elixir's built-in send
       import Kernel, except: [send: 2]
-      import Espresso
+      import EspressoWeb
       import Plug.Conn
       @behaviour Plug
 
@@ -66,11 +66,11 @@ defmodule Espresso do
       end
 
       def listen(port \\ 4000) do
-        IO.puts("🚀 Espresso serving on http://localhost:#{port}")
+        IO.puts("🚀 EspressoWeb serving on http://localhost:#{port}")
         Plug.Cowboy.http(__MODULE__, [], port: port)
       end
 
-      @before_compile Espresso
+      @before_compile EspressoWeb
     end
   end
 

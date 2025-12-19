@@ -5,7 +5,7 @@ defmodule EspressoTest do
 
   # Define a test server using the new "Beautiful" syntax
   defmodule TestServer do
-    use Espresso
+    use EspressoWeb
 
     scope "/api" do
       # Testing the 'json' helper and dynamic params

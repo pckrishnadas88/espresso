@@ -1,5 +1,5 @@
 defmodule MyApp do
-  use Espresso
+  use EspressoWeb
 
   # Middleware for JSON, form-data, urlencode parsing
   use_middleware(Plug.Parsers,
@@ -9,7 +9,7 @@ defmodule MyApp do
   )
 
   # Enable logger middleware for request logging
-  use_middleware(Espresso.Logger)
+  use_middleware(EspressoWeb.Logger)
 
   # health check route
   get "/health" do

@@ -1,4 +1,4 @@
-defmodule Espresso.Logger do
+defmodule EspressoWeb.Logger do
   import Plug.Conn
   require Logger
 

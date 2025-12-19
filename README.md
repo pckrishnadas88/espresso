@@ -1,6 +1,6 @@
-# Espresso ☕
+# Espresso web ☕
 
-**Espresso** is a lightweight, high-performance web framework for Elixir, inspired by the ergonomics of Express.js.
+**Espresso web** is a lightweight, high-performance web framework for Elixir, inspired by the ergonomics of Express.js.
 
 Unlike traditional frameworks that resolve routes at runtime, Espresso uses **Metaprogramming** to compile your routes directly into native Elixir function headers. This results in **O(1) routing speed** and minimal memory overhead, leveraging the full power of the BEAM virtual machine.
 
