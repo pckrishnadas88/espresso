@@ -21,7 +21,7 @@ Add `espresso` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:espresso, path: "../espresso"}, # While in development
+    {:espresso_web, "~> 0.1.0"},
     {:plug_cowboy, "~> 2.7"},
     {:jason, "~> 1.4"}
   ]
@@ -81,11 +81,11 @@ end
 
 ---
 
-## Architecture: Why Espresso?
+## Architecture: Why Espresso Web?
 
-Most web frameworks store routes in a list and iterate through them for every request. Espresso is different.
+Most web frameworks store routes in a list and iterate through them for every request. Espresso Web is different.
 
-When you write a route in Espresso, the **Macro Engine** performs a "Code Merge." It takes your logic and injects it into a private dispatch function. At runtime, the BEAM uses its highly optimized pattern matching to jump directly to the correct code block.
+When you write a route in Espresso Web, the **Macro Engine** performs a "Code Merge." It takes your logic and injects it into a private dispatch function. At runtime, the BEAM uses its highly optimized pattern matching to jump directly to the correct code block.
 
 ### Pipeline Flow
 
@@ -115,17 +115,17 @@ MIT
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `espresso` to your list of dependencies in `mix.exs`:
+by adding `espresso_web` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:espresso, "~> 0.1.0"}
+    {:espresso_web, "~> 0.1.0"}
   ]
 end
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/espresso>.
+be found at <https://hexdocs.pm/espresso_web>.
 

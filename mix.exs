@@ -9,7 +9,6 @@ defmodule Espresso.MixProject do
       start_permanent: Mix.env() == :prod,
       description: "A lightweight, macro-based web framework inspired by Express.js",
       deps: deps(),
-      description: "A minimal, macro-based web framework inspired by Express.js",
       package: package(),
       name: "EspressoWeb",
       source_url: "https://github.com/pckrishnadas88/espresso"
