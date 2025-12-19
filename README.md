@@ -16,7 +16,9 @@ Unlike traditional frameworks that resolve routes at runtime, Espresso uses **Me
 
 ## Installation
 
-Add `espresso` to your list of dependencies in `mix.exs`:
+Add `espresso_web` to your list of dependencies in `mix.exs`:
+
+https://hex.pm/packages/espresso_web
 
 ```elixir
 def deps do
@@ -29,15 +31,18 @@ end
 
 ```
 
+The docs can
+be found at <https://hexdocs.pm/espresso_web>.
+
 ---
 
 ## Quick Start
 
-Building an API with Espresso is straightforward. Define your routes and start the listener:
+Building an API with EspressoWeb is straightforward. Define your routes and start the listener:
 
 ```elixir
 defmodule MyApp do
-  use Espresso
+  use EspressoWeb
 
   # Middleware for JSON, form-data, urlencode parsing
   use_middleware Plug.Parsers,
@@ -46,11 +51,11 @@ defmodule MyApp do
     json_decoder: Jason
   
   # Enable logger middleware for request logging
-  use_middleware Espresso.Logger
+  use_middleware EspressoWeb.Logger
 
   # Root Route
   get "/" do
-    conn |> send("Welcome to Espresso")
+    conn |> send("Welcome to Espresso Web")
   end
 
   # Scoped API
@@ -112,20 +117,6 @@ MIT
 
 ---
 
-## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `espresso_web` to your list of dependencies in `mix.exs`:
 
-```elixir
-def deps do
-  [
-    {:espresso_web, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/espresso_web>.
 
