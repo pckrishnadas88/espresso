@@ -46,6 +46,13 @@ defmodule MyApp do
 
     # DELETE
     delete "/users/:id" do
+      users = [
+        %{id: "1", name: "Jose"},
+        %{id: "2", name: "Chris"},
+        %{id: "3", name: "You"}
+      ]
+
+      Enum.reject(users, fn user -> user.id == id end)
       conn |> status(204) |> send("")
     end
   end

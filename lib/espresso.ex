@@ -1,13 +1,23 @@
 defmodule Espresso do
-  @version "0.1.0"
   @moduledoc """
-  Espresso is a minimal, macro-based web framework.
+  Espresso is a minimal, high-performance web framework for Elixir.
 
-  It allows for Express-like routing while leveraging the
-  performance and fault-tolerance of the Erlang VM.
+  It uses metaprogramming to compile your routes into highly optimized pattern-matching
+  functions, providing a developer experience similar to Express.js but with the
+  fault-tolerance and speed of the Erlang VM (BEAM).
   """
+  @version "0.1.0"
 
   def version, do: @version
+
+  @doc """
+  Sets up the module to use Espresso.
+
+  When you `use Espresso`, it:
+  1. Imports `Espresso` and `Plug.Conn` functions.
+  2. Sets up the route tracking system.
+  3. Prepares the module for the `@before_compile` hook.
+  """
 
   defmacro __using__(_opts) do
     quote do
@@ -25,12 +35,30 @@ defmodule Espresso do
       def init(opts), do: opts
       def call(var!(conn), _opts), do: execute_pipeline(var!(conn))
 
+      @doc """
+      Sets the HTTP status code for the response.
+
+      ## Examples
+          conn |> status(404) |> send("Not Found")
+      """
       def status(var!(conn), code), do: %{var!(conn) | status: code}
 
+      @doc """
+      Sends a plain text response.
+
+      ## Examples
+          conn |> send("Hello World")
+      """
       def send(var!(conn), body) do
         send_resp(var!(conn), var!(conn).status || 200, body)
       end
 
+      @doc """
+      Sends a JSON response.
+
+      Automatically encodes the data using `Jason` and sets the `content-type`
+      header to `application/json`.
+      """
       def json(var!(conn), data) do
         var!(conn)
         |> put_resp_content_type("application/json")
@@ -46,7 +74,18 @@ defmodule Espresso do
     end
   end
 
-  # ... (Keep scope, use_middleware, and verbs the same) ...
+  @doc """
+  Groups routes under a specific path prefix.
+
+  Useful for versioning APIs or grouping related resources.
+
+  ## Examples
+      scope "/api/v1" do
+        get "/users" do
+          # logic
+        end
+      end
+  """
   defmacro scope(path, do: block) do
     quote do
       old_prefix = Module.get_attribute(__MODULE__, :path_prefix)
@@ -62,15 +101,29 @@ defmodule Espresso do
   @doc """
   Defines a GET route.
 
+  Takes a `path` string and a `do` block. The block has access to a `conn`
+  variable representing the connection.
+
   ## Examples
-      get "/hello" do
-        conn |> send("world")
+      get "/ping" do
+        conn |> send_resp(200, "pong")
       end
   """
   defmacro get(path, do: block), do: define_route("GET", path, block)
+
+  @doc """
+  Defines a POST route.
+
+  Commonly used for creating resources or handling form submissions.
+  """
   defmacro post(path, do: block), do: define_route("POST", path, block)
   defmacro put(path, do: block), do: define_route("PUT", path, block)
   defmacro patch(path, do: block), do: define_route("PATCH", path, block)
+
+  @doc """
+  Defines a DELETE route.
+  Used for removing resources. Returns a connection.
+  """
   defmacro delete(path, do: block), do: define_route("DELETE", path, block)
 
   defp define_route(method, path, block) do
